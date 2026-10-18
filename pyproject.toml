@@ -8,6 +8,7 @@ requires-python = ">=3.12"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]          # modules live in the project root; bare `pytest` does not add it to sys.path
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 markers = ["integration: needs PostgreSQL (TEST_DB_DSN); skipped without it"]
