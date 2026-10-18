@@ -1,0 +1,19 @@
+.venv/
+.venv.old/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+# Telethon sessions give full access to the Telegram account: never commit them
+*.session
+*.session-journal
+tg_session.*
+.DS_Store
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+logs/
+instance
+last_ids.json

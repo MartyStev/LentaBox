@@ -1,0 +1,55 @@
+[project]
+name = "stenabot"
+version = "1.0.0"
+description = "Telegram userbot that reads channels, drops duplicate news and posts each story once"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = ["integration: needs PostgreSQL (TEST_DB_DSN); skipped without it"]
+
+[tool.coverage.run]
+source = ["core", "db", "handlers", "config"]
+omit = ["bot.py"]   # entry point: signals and a live Telegram session are checked by hand
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_covered = true
+
+[tool.mypy]
+# Pure modules are checked strictly; Telethon and psycopg2 glue is brought under mypy gradually.
+files = ["core", "config.py"]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = true
+check_untyped_defs = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = [".venv", ".venv.old"]
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "ASYNC", "UP", "SIM", "PL", "S"]
+ignore = [
+    "E501",     # line length: 120 is enough, the rest is up to the author
+    "E702",     # `a; return` in short handler branches
+    "S101",     # assert in tests and invariants
+    "S608",     # SQL is built from module constants, parameters are always %s
+    "PLR2004",  # magic numbers in tests and thresholds
+    "PLR0913", "PLR0917",
+    "PLW0603",  # pool and cache singletons
+    "ASYNC109",
+    "PLR0911",  # guard-clause functions read better than nested ifs
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "PL", "E741", "SIM"]
+"scripts/*" = ["S"]
+# handler modules register Telethon callbacks as closures inside one function, so those functions are long by design
+"handlers/*" = ["PLR0912", "PLR0915"]

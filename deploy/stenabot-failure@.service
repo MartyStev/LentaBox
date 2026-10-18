@@ -1,0 +1,13 @@
+[Unit]
+Description=Stenabot: notify the owner that unit %I failed
+
+[Service]
+Type=oneshot
+User=stenabot
+EnvironmentFile=/opt/stenabot/.env
+# %I is the unescaped unit name ("stenabot.service"), not the escaped %i
+ExecStart=/opt/stenabot/deploy/notify-failure.sh %I
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes

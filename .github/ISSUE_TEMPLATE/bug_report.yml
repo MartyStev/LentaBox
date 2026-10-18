@@ -1,0 +1,39 @@
+name: Bug report
+description: Something does not work as described
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Never paste your `.env`, `*.session` file, API hash, tokens or chat IDs.**
+        Security problems go through private reporting (see SECURITY.md), not issues.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you got instead.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log excerpt
+      description: The relevant lines from `journalctl -u stenabot` or `docker compose logs bot`, with private data removed.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+    validations:
+      required: true
+  - type: dropdown
+    id: run
+    attributes:
+      label: How do you run it
+      options: [Docker Compose, systemd, by hand, other]
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Python and PostgreSQL versions, embeddings server

@@ -1,0 +1,64 @@
+# Everything in one command: the bot, PostgreSQL and a local embeddings server.
+#
+#   cp .env.example .env              # fill in API_ID, API_HASH, TARGET_CHAT_ID, OWNER_ID, DB_PASSWORD
+#   docker compose run --rm bot       # first start: log in to Telegram (phone number and code), then Ctrl+C
+#   docker compose up -d              # run in the background
+#   docker compose logs -f bot
+#
+# The session file is kept in the "session" volume. Never copy it anywhere public.
+name: stenabot
+
+services:
+  bot:
+    build: .
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      EMBEDDINGS_URL: http://embeddings:8081/v1/embeddings
+      SESSION_NAME: /data/stenabot
+    volumes:
+      - session:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      embeddings:
+        condition: service_healthy
+    # Exit code 3 means the session is not authorized: run `docker compose run --rm bot` once to log in.
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: ${DB_NAME:-stenabot}
+      POSTGRES_USER: ${DB_USER:-stenabot}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  embeddings:
+    # llama.cpp server with nomic-embed-text; the model (~140 MB) is downloaded on the first start.
+    # Already have an embeddings server? Remove this service and set EMBEDDINGS_URL in .env instead.
+    image: ghcr.io/ggml-org/llama.cpp:server
+    command: ["--embedding", "--pooling", "mean", "-hf", "nomic-ai/nomic-embed-text-v1.5-GGUF:Q8_0",
+              "--host", "0.0.0.0", "--port", "8081"]
+    volumes:
+      - models:/root/.cache/llama.cpp
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  session:
+  pgdata:
+  models:

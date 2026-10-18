@@ -1,0 +1,7 @@
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS saved_at TIMESTAMPTZ;
+UPDATE posts
+SET saved_at = COALESCE(created_at AT TIME ZONE 'UTC', NOW())
+WHERE saved_at IS NULL;
+ALTER TABLE posts ALTER COLUMN saved_at SET DEFAULT NOW();
+ALTER TABLE posts ALTER COLUMN saved_at SET NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_posts_saved_at ON posts (saved_at DESC);

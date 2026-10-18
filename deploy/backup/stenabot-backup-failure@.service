@@ -1,0 +1,8 @@
+[Unit]
+Description=Stenabot: notify about failure of unit %I
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/stenabot-backup.env
+# Template: the failed unit name (stenabot-backup.service or stenabot-restore-check.service) goes into the message
+ExecStart=/usr/local/bin/stenabot-notify-failure.sh %I

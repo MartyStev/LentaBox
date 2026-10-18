@@ -1,0 +1,46 @@
+[Unit]
+Description=Stenabot
+# Restart without limit: after a PostgreSQL restart ten quick failures would otherwise leave the unit "failed".
+StartLimitIntervalSec=0
+OnFailure=stenabot-failure@%n.service
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+# bot.py sends READY=1 after migrations and handler registration, then WATCHDOG=1 every WATCHDOG_SEC.
+Type=notify
+NotifyAccess=main
+User=stenabot
+WorkingDirectory=/opt/stenabot
+EnvironmentFile=/opt/stenabot/.env
+ExecStart=/opt/stenabot/.venv/bin/python bot.py
+Restart=always
+RestartSec=5
+# If the event loop hangs, systemd restarts the process.
+WatchdogSec=300
+# Exit code 3 means the Telegram session is not authorized: log in by hand, restarting cannot help.
+RestartPreventExitStatus=3
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+SystemCallFilter=@system-service
+# A forbidden call returns EPERM instead of killing the process with SIGSYS.
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+# Code and .venv are read-only. The Telethon session lives in /opt/stenabot/var
+# (set SESSION_NAME=/opt/stenabot/var/stenabot in .env).
+ReadWritePaths=/opt/stenabot/var
+UMask=0077
+MemoryMax=1G
+
+[Install]
+WantedBy=multi-user.target
