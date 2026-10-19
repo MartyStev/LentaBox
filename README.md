@@ -1,4 +1,4 @@
-# Stenabot
+# LentaBox
 
 [![CI](https://github.com/MartyStev/LentaBox/actions/workflows/ci.yml/badge.svg)](https://github.com/MartyStev/LentaBox/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)
 
@@ -6,7 +6,7 @@
 
 A Telegram userbot that reads the channels you choose, drops duplicate news and posts every story to your target chat **once** — with a link to the original.
 
-News channels repeat each other all day. Stenabot compares every new post with what it has already published (exact text, reposts, fuzzy text, and embedding similarity of the *story*), so one event appears in your feed one time, no matter how many channels cover it.
+News channels repeat each other all day. LentaBox compares every new post with what it has already published (exact text, reposts, fuzzy text, and embedding similarity of the *story*), so one event appears in your feed one time, no matter how many channels cover it.
 
 - **Deduplication that understands stories**, not just identical text: embeddings are clustered, and a story is posted at most once per sliding 24-hour window.
 - **Exactly-once publishing.** A story is reserved in PostgreSQL before it is sent and confirmed in one transaction afterwards. If the outcome of a send is unknown, the bot does *not* retry blindly — it asks you ([unknown outcome](#unknown-send-outcome)).
